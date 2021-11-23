@@ -1,9 +1,15 @@
 %language "c++"
 %require "3.2"
 
+%code requires {
+	#include "ast.hh"
+	using namespace AST;
+}
+
 %define api.token.raw
-%define api.value.type { int }
-%parse-param {int &val}
+%define api.value.type { INode * }
+%parse-param {yy::parser::semantic_type &ast}
+
 %code provides {
 	#define YYSTYPE yy::parser::semantic_type
 }
@@ -27,15 +33,15 @@
 	NUM
 %nterm expr
 
-//%left PLUS
+%left PLUS
 
 %start program
 %%
-program: expr		{ val = $1; }
+program: expr		{ ast = $1; }
 ;
 
-expr:	expr PLUS expr	{ $$ = $1 + $3; }
-    |	LPAR expr RPAR	{ $$ = $2; }
+expr:	expr PLUS expr	{ $$ = new BinOp{std::plus<ValT>(), $1, $3}; }
+    |	LPAR expr RPAR	{ $$ = $1; }
     |	NUM		{ $$ = $1; }
 ;
 

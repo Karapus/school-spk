@@ -1,6 +1,7 @@
-%option noyywrap bison-bridge
+%option noyywrap bison-bridge nounput
 %{
 	#include "grammar.tab.hh"
+	#include "ast.hh"
 	#include <string>
 	#define YY_TERMINATE return 
 %}
@@ -20,7 +21,7 @@ num	([1-9][0-9]*)|"0"
 "("		return yy::parser::token::TOK_LPAR;
 ")"		return yy::parser::token::TOK_RPAR;
 {num}	{
-		*yylval = std::stoi(yytext);
+		*yylval = new AST::ImVal{std::stoi(yytext)};
 		return yy::parser::token::TOK_NUM;
 	}
 .	throw yy::parser::syntax_error("invalid character: " + std::string(yytext));
